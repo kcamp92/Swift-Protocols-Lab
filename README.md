@@ -39,7 +39,52 @@ three instances of a `Human`, then create an array called people of type [`Human
 Create a new array called sortedPeople of type [`Human`] that is the people array sorted by age.
 
 </br> </br>
+```
+class Human: CustomStringConvertible, Equatable, Comparable {
+static func < (lhs: Human, rhs: Human) -> Bool {
+return lhs.age < rhs.age
+}
 
+static func == (lhs: Human, rhs: Human) -> Bool {
+return lhs.name == rhs.name && lhs.age == rhs.age
+}
+
+var description: String {
+get {
+return "this person's name is \(name) and their age is \(age)"
+}
+}
+
+var name: String
+var age: Int
+
+init(name:String, age: Int) {
+self.age = age
+self.name = name
+}
+}
+let david = Human(name: "dave", age: 30)
+print(david)
+String(describing: david)
+let istishna = Human(name: "tish", age: 30)
+print(istishna)
+
+let carmen = Human(name: "Sandiego", age: 55)
+let bill = Human(name: "Gates", age: 70)
+let sandy = Human(name: "Brooks", age: 100)
+
+var array: [Human] = [carmen,david,istishna,bill,sandy]
+var sortedPeople: [Human] = []
+
+sortedPeople = array.sorted(by: {$0.age > $1.age})
+print(sortedPeople)
+
+
+print(carmen != bill)
+print(carmen == bill)
+print(carmen < bill)
+
+```
 
 ## Question 2
 
@@ -56,7 +101,35 @@ and drive() should print "Begin pedaling!". Create an instance of Bike, print it
 then call drive().
 
 </br> </br>
+```
+protocol Vehicle {
+var numberOfWheels: Int {
+get
+}
+func drive()
+}
 
+struct Car: Vehicle {
+var numberOfWheels: Int
+
+func drive() {
+print("Vroom vroom!")
+}
+}
+let rangeRover = Car(numberOfWheels: 4) .drive()
+
+//print(rangeRover)
+
+struct Bike: Vehicle {
+var numberOfWheels: Int
+
+func drive() {
+print("Begin Pedaling!")
+}
+}
+
+let citiBike = Bike(numberOfWheels: 2) .drive()
+```
 
 ## Question 3
 // Given the below two protocols, create a struct for penguin(a flightless bird) and an eagle.
@@ -73,7 +146,36 @@ protocol Flyable {
  var airspeedVelocity: Double { get }
 }
 ```
+```
+protocol Bird {
+var name: String { get }
+var canFly: Bool { get }
+}
 
+protocol Flyable {
+var airspeedVelocity: Double { get }
+}
+
+struct Penguin: Bird  {
+var name: String
+
+var canFly: Bool
+
+
+}
+
+struct Eagle: Bird, Flyable {
+var airspeedVelocity: Double
+
+var name: String
+
+var canFly: Bool
+
+}
+
+Eagle(airspeedVelocity: 75.0, name: "Amer", canFly: true)
+Penguin(name: "Happy", canFly: false)
+```
 </br> </br>
 
 ## Question 4
@@ -116,7 +218,40 @@ e. `message` should return a unique message for each animal when talk is called.
 f. Put an instance of each of your classes in an array.
 
 g. Iterate over the array and have them print their `message` property
+```
 
+protocol Communication {
+var message: String {get}
+}
+
+class Cow: Communication {
+var message: String {return "moooo"}
+var makesMilk = true
+
+}
+class Dog: Communication {
+var message: String {return "woof woof"}
+var fur = true
+
+}
+class Cat: Communication {
+var message: String {return "meow"}
+var shitsInSand = true
+}
+
+let b = Cow()
+let c = Dog()
+let d = Cat()
+
+let array1: [Communication] = [Cow(), Dog(), Cat()]
+for a in array1 {
+print(a.message)
+if let newA = a as? Cow {
+print(newA)
+print("its a cow, holy cow")
+}
+}
+```
 
 ## Question 6
 
@@ -159,3 +294,54 @@ Now make HeartRateViewController adopt the protocol you've just created. Inside 
 Now add a property called delegate to HeartRateReceiver that is of type HeartRateReceiverDelegate?. In the didSet of currentHR where currentHR is successfully unwrapped, call heartRateUpdated(to bpm:) on the delegate property.
 
 Finally, return to the line of code just after you initialized an instance of HeartRateReceiver. Initialize an instance of HeartRateViewController. Then, set the delegate property of your instance of HeartRateReceiver to be the instance of HeartRateViewController that you just created. Wait for your code to compile and observe what is printed to the console. Every time that currentHR gets set, you should see both a printout of the most recent heart rate, and the print statement stating that the heart rate was shown to the user.
+```
+
+protocol HeartRateReceiverDelegate {
+func heartRateUpdated (to bpm: Int)
+}
+
+
+class HeartRateReceiver: HeartRateReceiverDelegate {
+func heartRateUpdated(to bpm: Int) {
+<#code#>
+}
+
+var currentHR: Int? {
+// not a stored value. Does a thing but holds no data
+//when does it do that thing? after the value for this var is set
+//NOT a computed property, Its a property observer
+didSet {
+if let currentHR = currentHR {
+print("The most recent heart rate reading is \(currentHR).")
+} else {
+print("Looks like we can't pick up a heart rate.")
+}
+}
+}
+
+func startHeartRateMonitoringExample() {
+for _ in 1...10 {
+let randomHR = 60 + Int.random(in: 0...15)
+// this will trigger didSet above
+currentHR = randomHR
+// don't do anything for 2 seconds on this thread
+Thread.sleep(forTimeInterval: 2)
+}
+}
+}
+
+
+class HeartRateViewController: UIViewController, HeartRateReceiverDelegate {
+func heartRateUpdated(to bpm: Int) {
+heartRateUpdated(to: <#T##Int#>)
+}
+
+// this is not an outlet, this is something we're creating in the controller to eventually use in the UI
+
+//where as we've usually usedIB, this is creating UI using a disciopline/pattern/something called Programmatic UI
+var heartRateLabel: UILabel = UILabel()
+}
+
+var hrReceiver = HeartRateReceiver ()
+hrReceiver.startHeartRateMonitoringExample()
+```
